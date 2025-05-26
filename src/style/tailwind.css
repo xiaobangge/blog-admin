@@ -1,0 +1,73 @@
+@layer theme, base, components, utilities;
+@import "tailwindcss/theme.css" layer(theme);
+@import "tailwindcss/utilities.css" layer(utilities);
+@import "./modules/login.scss";
+
+@custom-variant dark (&:is(.dark *));
+@theme {
+  --color-bg_color: var(--el-bg-color);
+  --color-primary: var(--el-color-primary);
+  --color-text_color_primary: var(--el-text-color-primary);
+  --color-text_color_regular: var(--el-text-color-regular);
+  --theme-color: #425aef;
+
+  /* 登录页 */
+
+  --animate-login-bg: login-bg 0.1s ease-in-out 1 forwards;
+  --animate-login-out: login-out 0.8s ease-in-out 1 forwards;
+  --animate-login-out1: login-out1 0.8s ease-in-out 1 forwards;
+  --animate-login-in: login-in 0.8s ease-in-out 1 forwards;
+  --animate-login-in1: login-in1 0.8s ease-in-out 1 forwards;
+  --animate-login-form-in: login-form-in 0.8s ease-in-out 1 forwards;
+  --animate-register-form-in: register-form-in 0.8s ease-in-out 1 forwards;
+  --animate-register-out: register-out 0.8s ease-in-out 1 forwards;
+  --animate-register-out1: register-out1 0.8s ease-in-out 1 forwards;
+  --animate-register-in: register-in 0.8s ease-in-out 1 forwards;
+  --animate-register-in1: register-in1 0.8s ease-in-out 1 forwards;
+}
+
+.subtitle {
+  -webkit-text-fill-color: transparent;
+  background: linear-gradient(
+    94.75deg,
+    rgb(75 124 235) 0%,
+    rgb(253 131 101) 43.66%,
+    rgb(255 0 150) 64.23%,
+    rgb(222 89 89) 83.76%,
+    rgb(119 133 249) 100%
+  );
+  -webkit-background-clip: text;
+}
+/*
+  The default border color has changed to `currentColor` in Tailwind CSS v4,
+  so we've added these compatibility styles to make sure everything still
+  looks the same as it did with Tailwind CSS v3.
+
+  If we ever want to remove these styles, we need to add an explicit border
+  color utility to any element that depends on these defaults.
+*/
+@layer base {
+  *,
+  ::after,
+  ::before,
+  ::backdrop,
+  ::file-selector-button {
+    border-color: var(--color-gray-200, currentColor);
+  }
+}
+
+@utility flex-c {
+  @apply flex justify-center items-center;
+}
+
+@utility flex-ac {
+  @apply flex justify-around items-center;
+}
+
+@utility flex-bc {
+  @apply flex justify-between items-center;
+}
+
+@utility navbar-bg-hover {
+  @apply dark:text-white dark:hover:bg-[#242424]!;
+}

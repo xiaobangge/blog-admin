@@ -1,0 +1,134 @@
+/* --animate-login-bg: login-bg 0.1s ease-in-out 1 forwards; */
+@keyframes login-bg {
+  0% {
+    background-color: #7494ec;
+  }
+
+  100% {
+    background-color: #fff;
+  }
+}
+
+/* --animate-login-out: login-out 0.8s ease-in-out 1 forwards; */
+@keyframes login-out {
+  0% {
+    width: 50%;
+  }
+
+  100% {
+    display: none;
+    width: 120%;
+  }
+}
+
+/* --animate-login-out1: login-out1 0.8s ease-in-out 1 forwards; */
+@keyframes login-out1 {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+/* --animate-login-in: login-in 0.8s ease-in-out 1 forwards; */
+@keyframes login-in {
+  0% {
+    display: none;
+    width: 120%;
+  }
+
+  1% {
+    display: flex;
+  }
+
+  100% {
+    width: 50%;
+  }
+}
+
+/* --animate-login-in1: login-in1 0.8s ease-in-out 1 forwards; */
+@keyframes login-in1 {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* --animate-login-form-in: login-form-in 0.8s ease-in-out 1 forwards; */
+@keyframes login-form-in {
+  0% {
+    transform: translate(-200%);
+  }
+
+  100% {
+    transform: translate(0);
+  }
+}
+
+/* --animate-register-form-in: register-form-in 0.8s ease-in-out 1 forwards; */
+@keyframes register-form-in {
+  0% {
+    transform: translate(200%);
+  }
+
+  100% {
+    transform: translate(0);
+  }
+}
+
+/* --animate-register-out: register-out 0.8s ease-in-out 1 forwards; */
+@keyframes register-out {
+  0% {
+    width: 50%;
+  }
+
+  100% {
+    display: none;
+    width: 120%;
+  }
+}
+
+/* --animate-register-out1: register-out1 0.8s ease-in-out 1 forwards; */
+@keyframes register-out1 {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+/* --animate-register-in: register-in 0.8s ease-in-out 1 forwards; */
+@keyframes register-in {
+  0% {
+    display: none;
+    width: 120%;
+  }
+
+  1% {
+    display: flex;
+  }
+
+  100% {
+    width: 50%;
+  }
+}
+
+/* --animate-register-in1: register-in1 0.8s ease-in-out 1 forwards; */
+@keyframes register-in1 {
+  0% {
+    transform: translateX(100%);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
+}
+
+/* } */
