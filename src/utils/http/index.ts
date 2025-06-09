@@ -12,6 +12,8 @@ import type {
 import { stringify } from "qs";
 import NProgress from "../progress";
 import { getToken, formatToken } from "@/utils/auth";
+import router from "@/router";
+import {message} from "@/utils/message";
 // import { useUserStoreHook } from "@/store/modules/user";
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
@@ -64,6 +66,7 @@ class PureHttp {
       async (config: PureHttpRequestConfig): Promise<any> => {
         // 开启进度条动画
         NProgress.start();
+        config.headers["NeedToken"] = true;
         // 优先判断post/get等方法是否传入回调，否则执行初始化设置等回调
         if (typeof config.beforeRequestCallback === "function") {
           config.beforeRequestCallback(config);
@@ -109,6 +112,12 @@ class PureHttp {
         if (PureHttp.initConfig.beforeResponseCallback) {
           PureHttp.initConfig.beforeResponseCallback(response);
           return response.data;
+        }
+        if (response.data.code === 401) {
+          // 401 代表`token`过期，需要退回登录页面重新登录
+          message("登录信息已过期，请重新登录", { type: "error" });
+          router.push("/login");
+          return Promise.reject(response.data);
         }
         return response.data;
       },

@@ -14,8 +14,15 @@
         :onFormReady="handleFormReady"
       />
       <div class="mt-[20px] flex justify-center items-center">
-        <el-button type="primary" @click="addRowData(customFormRef)">新增</el-button>
-        <el-button type="primary" @click="updataRowData(customFormRef)">修改</el-button>
+        <el-button
+          v-if="!route.query.id"
+          type="primary"
+          @click="addRowData(customFormRef)"
+          >新增</el-button
+        >
+        <el-button v-else type="primary" @click="updataRowData(customFormRef)"
+          >修改</el-button
+        >
         <el-button type="default" class="ml-[10px]" @click="goBack"
           >取消</el-button
         >
@@ -36,7 +43,7 @@ import {
   getArticleDetail,
   updataRowData
 } from "./config";
-const title = ref("新增文章");
+const title = ref("新增碎碎念");
 import { useRoute } from "vue-router";
 const route = useRoute();
 // 处理新增按钮点击事件
@@ -45,14 +52,13 @@ const handleFormReady = formRef => {
   customFormRef.value = formRef;
 };
 const goBack = () => {
-  router.push("/document/article/index");
+  router.push("/document/comment/index");
 };
 onMounted(() => {
-  for (const key in addFormData.value) {
-    addFormData.value[key] = "";
-  }
+  addFormData.value["content"] = "";
+  addFormData.value["id"] = "";
   if (route.query.id) {
-    title.value = "编辑文章";
+    title.value = "编辑碎碎念";
     getArticleDetail(Number(route.query.id));
   }
 });

@@ -46,6 +46,6 @@ export async function updateArticle(data: ArticleType) {
 }
 
 // 删除文章
-export async function deleteArticle(id: number) {
+export async function deleteArticle(id: number | number[]) {
   return http.request<onceResult>("post", `/article/delete`, { data: { id } });
 }

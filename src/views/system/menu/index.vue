@@ -39,7 +39,7 @@
     >
       <!-- 🆕 新增按钮 -->
       <el-button
-        v-if="isAuth(MenuButtonEnum.添加)"
+        :disabled="isAuth()"
         style="margin-bottom: 15px"
         type="primary"
         @click="openDialog()"
@@ -83,14 +83,14 @@
         <el-table-column label="操作">
           <template #default="{ row }">
             <el-button
-              v-if="isAuth(MenuButtonEnum.编辑)"
+              :disabled="isAuth()"
               type="primary"
               size="small"
               @click="openDialog(row)"
               >编辑</el-button
             >
             <CustomButton
-              v-if="isAuth(MenuButtonEnum.删除)"
+              :disabled="isAuth()"
               size="small"
               type="danger"
               :customEvent="() => deleteMenu(row.id)"
@@ -168,7 +168,7 @@ import {
 } from "@/api/routes";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
 import IconSelect from "@/components/ReIconSelect/index.vue";
-import { isAuth, MenuButtonEnum } from "@/utils/buttonOermission";
+import { isAuth } from "@/utils/buttonOermission";
 import BkSvg from "@/components/BkSvg/index.vue";
 
 // 🔍 搜索相关

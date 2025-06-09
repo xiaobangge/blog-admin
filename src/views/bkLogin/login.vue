@@ -45,7 +45,11 @@
         <template #btns="{ form, ruleFormRef }">
           <div class="flex flex-col justify-center items-center w-full">
             <div class="flex justify-between items-center w-full mb-[15px]">
-              <el-checkbox v-model="remember">记住我</el-checkbox>
+              <el-checkbox
+                v-model="remember"
+                @change="useUserStoreHook().SET_ISREMEMBERED(remember)"
+                >记住我</el-checkbox
+              >
               <el-button type="primary" link @click="toggleType('forgetPwd')"
                 >忘记密码？</el-button
               >
@@ -66,7 +70,7 @@
 </template>
 
 <script lang="ts" setup>
-import { ref, reactive } from "vue";
+import { ref, reactive, onMounted } from "vue";
 import From from "@/components/BkForm/index.vue";
 const emit = defineEmits(["toggleType"]); // 定义事件
 import { FromColumns, FormData } from "@/types/Form";
@@ -104,6 +108,13 @@ const formData = reactive<FormData>({
 const rules = reactive<FormRules>({
   username: [{ required: true, message: "请输入用户名", trigger: "blur" }],
   password: [{ required: true, message: "请输入密码", trigger: "blur" }]
+});
+
+onMounted(() => {
+  const remembered = useUserStoreHook().remembered;
+  remember.value = remembered.isRemembered;
+  formData.username = remembered.userInfo?.username;
+  formData.password = remembered.userInfo?.password;
 });
 
 const type = ref(true); // 登录注册切换

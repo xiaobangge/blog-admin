@@ -1,26 +1,30 @@
 <template>
-  <CustomTableForm
-    :pagination="pagination"
-    :fields="searchFields"
-    :modelValue="searchData"
-    :selectable="selectable"
-    :tableData="tableData"
-    :sortConfig="sortConfig"
-    :columns="columns"
-    @selectedDataEvent="selectedDataEvent"
-    @loadData="loadData"
-    @pageChange="pageChange"
-  >
-    <el-button v-debounce="handleAdd" :disabled="isAuth()" type="primary">
-      新增
-    </el-button>
-    <CustomButton
-      :disabled="isAuth() && isDisabled"
-      type="success"
-      :customEvent="handleDelete"
-      >删除</CustomButton
+  <div>
+    <CustomTableForm
+      :pagination="pagination"
+      :fields="searchFields"
+      :modelValue="searchData"
+      :selectable="selectable"
+      :tableData="tableData"
+      :sortConfig="sortConfig"
+      :columns="columns"
+      @selectedDataEvent="selectedDataEvent"
+      @loadData="loadData"
+      @pageChange="pageChange"
     >
-  </CustomTableForm>
+      <el-button :disabled="isAuth()" v-debounce="handleAdd" type="primary">
+        新增
+      </el-button>
+      <CustomButton
+        :disabled="isAuth() && isDisabled"
+        type="denger"
+        :customEvent="handleDelete"
+        >删除</CustomButton
+      >
+      <el-button v-debounce="handleType" type="success"> 类型列表 </el-button>
+    </CustomTableForm>
+    <find-type ref="findRef" @change="loadTypeData"/>
+  </div>
 </template>
 
 <script setup lang="tsx">
@@ -36,20 +40,24 @@ import {
   tableData,
   addRowData,
   pageChange,
-  changeFormData,
-  updataRowData,
   sortConfig,
+  typeList,
+  loadTypeData,
   columns as initialColumns
 } from "./config";
 import CustomTableForm from "@/components/CustomTableForm/index.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
 import CustomForm from "@/components/CustomForm/CustomForm.vue";
-import { deleteUser } from "@/api/user";
-import CustomSwitch from "@/components/CustomForm/CustomSwitch.vue";
+import { deleteFind } from "@/api/Find";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
-import { isAuth, UserButtonEnum } from "@/utils/buttonOermission";
-
+import { isAuth } from "@/utils/buttonOermission";
+import { ElTooltip } from "element-plus";
+import FindType from "./type.vue";
+const findRef = ref(null);
+const handleType = () => {
+  findRef.value.openDrawer();
+};
 // 定义响应式状态
 const selectedData = ref([]);
 const isDisabled = ref(true);
@@ -70,8 +78,13 @@ const handleFormReady = formRef => {
 };
 const handleAdd = () => {
   addDialog({
-    title: "添加用户",
+    title: "添加趣味发现",
     contentRenderer() {
+      addFormData.value.title = "";
+      addFormData.value.image_url = "";
+      addFormData.value.content = "";
+      addFormData.value.type = 1;
+      addFormData.value.url = "";
       return (
         <CustomForm
           type="form"
@@ -102,7 +115,7 @@ const handleDelete = async () => {
       ids.push(item.id);
     }
     console.log(ids);
-    const res = await deleteUser(ids);
+    const res = await deleteFind(ids);
     if (res.code === 200) {
       message("删除成功", { type: "success" });
       loadData();
@@ -114,17 +127,17 @@ const handleDelete = async () => {
 
 // 修改 columns 配置
 const columns = initialColumns.map(item => {
-  if (item.label === "登录名称" || item.label === "创建时间") {
-    item.sortable = true;
+  if (item.label === "名称") {
+    item.cellRenderer = (row: any) => <div>{row.row.title}</div>;
   }
-  if (item.label === "头像") {
+  if (item.label === "logo") {
     item.cellRenderer = (row: any) => {
       return (
         <div>
-          {row.row.avatar ? (
+          {row.row.image_url ? (
             <img
-              src={row.row.avatar}
-              alt="头像"
+              src={row.row.image_url}
+              alt="LOGO"
               class="w-[32px] h-[32px] rounded-full"
             />
           ) : (
@@ -134,31 +147,38 @@ const columns = initialColumns.map(item => {
       );
     };
   }
-  if (item.label === "状态") {
+  if (item.label === "类型") {
     item.cellRenderer = (row: any) => {
-      const state = ref(row.row.state === 1);
+      console.log(row.row.type, typeList);
       return (
         <div>
-          {
-            <CustomSwitch
-              v-model={state.value}
-              disabled={isAuth()}
-              updataRowData={() => changeStatus(row)}
-              title={item.label}
-            />
-          }
+          {typeList.find(type => type.value === Number(row.row.type))?.label ||
+            "-"}
         </div>
+      );
+    };
+  }
+  if (item.label === "描述") {
+    item.cellRenderer = (row: any) => {
+      const html = `<div class="w-[200px]">${row.row.content || "-"}</div>`;
+      return (
+        <ElTooltip placement="bottom" content={html} raw-content>
+          <div
+            class="w-[200px] overflow-hidden text-ellipsis"
+            style="
+                display: -webkit-box; /* 将容器以弹性盒子形式布局 */
+                -webkit-line-clamp: 2; /* 限制文本显示为两行 */
+                -webkit-box-orient: vertical; /* 将弹性盒子的主轴方向设置为垂直方向 */
+              "
+          >
+            {row.row.content || "-"}
+          </div>
+        </ElTooltip>
       );
     };
   }
   return item;
 });
-
-const changeStatus = row => {
-  const state = row.row.state !== 1;
-  changeFormData.value = { ...row.row, state };
-  updataRowData(changeFormData);
-};
 
 // 初始化数据
 onMounted(() => {

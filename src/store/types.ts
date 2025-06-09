@@ -38,6 +38,11 @@ export type setType = {
 
 export type userType = {
   userInfo: any;
-  isRemembered?: boolean;
-  loginDay?: number;
+  remembered: {
+    isRemembered: boolean;
+    loginDay: string;
+    loginTime: string;
+    userInfo: any;
+  };
 };
+

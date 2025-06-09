@@ -36,8 +36,6 @@ import {
   tableData,
   addRowData,
   pageChange,
-  changeFormData,
-  updataRowData,
   sortConfig,
   columns as initialColumns
 } from "./config";
@@ -45,10 +43,9 @@ import CustomTableForm from "@/components/CustomTableForm/index.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
 import CustomForm from "@/components/CustomForm/CustomForm.vue";
-import { deleteUser } from "@/api/user";
-import CustomSwitch from "@/components/CustomForm/CustomSwitch.vue";
+import { deleteProject } from "@/api/Project";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
-import { isAuth, UserButtonEnum } from "@/utils/buttonOermission";
+import { isAuth } from "@/utils/buttonOermission";
 
 // 定义响应式状态
 const selectedData = ref([]);
@@ -72,6 +69,10 @@ const handleAdd = () => {
   addDialog({
     title: "添加用户",
     contentRenderer() {
+      addFormData.value.avatar = "";
+      addFormData.value.name = "";
+      addFormData.value.url = "";
+      addFormData.value.remark = "";
       return (
         <CustomForm
           type="form"
@@ -102,7 +103,7 @@ const handleDelete = async () => {
       ids.push(item.id);
     }
     console.log(ids);
-    const res = await deleteUser(ids);
+    const res = await deleteProject(ids);
     if (res.code === 200) {
       message("删除成功", { type: "success" });
       loadData();
@@ -114,17 +115,17 @@ const handleDelete = async () => {
 
 // 修改 columns 配置
 const columns = initialColumns.map(item => {
-  if (item.label === "登录名称" || item.label === "创建时间") {
+  if (item.label === "名称" || item.label === "创建时间") {
     item.sortable = true;
   }
-  if (item.label === "头像") {
+  if (item.label === "项目图标") {
     item.cellRenderer = (row: any) => {
       return (
         <div>
           {row.row.avatar ? (
             <img
               src={row.row.avatar}
-              alt="头像"
+              alt="项目图标"
               class="w-[32px] h-[32px] rounded-full"
             />
           ) : (
@@ -134,31 +135,8 @@ const columns = initialColumns.map(item => {
       );
     };
   }
-  if (item.label === "状态") {
-    item.cellRenderer = (row: any) => {
-      const state = ref(row.row.state === 1);
-      return (
-        <div>
-          {
-            <CustomSwitch
-              v-model={state.value}
-              disabled={isAuth()}
-              updataRowData={() => changeStatus(row)}
-              title={item.label}
-            />
-          }
-        </div>
-      );
-    };
-  }
   return item;
 });
-
-const changeStatus = row => {
-  const state = row.row.state !== 1;
-  changeFormData.value = { ...row.row, state };
-  updataRowData(changeFormData);
-};
 
 // 初始化数据
 onMounted(() => {

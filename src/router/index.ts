@@ -110,7 +110,7 @@ export function resetRouter() {
 }
 
 /** 路由白名单 */
-const whiteList = ["/login", "/welcome"];
+const whiteList = ["/login"];
 
 // const { VITE_HIDE_HOME } = import.meta.env;
 

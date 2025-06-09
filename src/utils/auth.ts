@@ -1,6 +1,7 @@
 import Cookies from "js-cookie";
 import { useUserStoreHook } from "@/store/modules/user";
-import { storageLocal, isString, isIncludeAllChildren } from "@pureadmin/utils";
+import { storageLocal } from "@pureadmin/utils";
+import { decryptDes, encryptDes } from "@/utils/crypto";
 
 export interface DataInfo<T> {
   /** token */
@@ -25,6 +26,7 @@ export interface DataInfo<T> {
 
 export const userKey = "user-info";
 export const TokenKey = "authorized-token";
+export const RememberedKey = "remembered";
 /**
  * 通过`multiple-tabs`是否在`cookie`中，判断用户是否已经登录系统，
  * 从而支持多标签页打开已经登录的系统后无需再登录。
@@ -115,6 +117,10 @@ export function setToken(data: DataInfo<Date>) {
   }
 }
 
+/** 格式化token（jwt格式） */
+export const formatToken = (token: string): string => {
+  return "Bearer " + token;
+};
 /** 删除`token`以及key值为`user-info`的localStorage信息 */
 export function removeToken() {
   Cookies.remove(TokenKey);
@@ -122,20 +128,61 @@ export function removeToken() {
   storageLocal().removeItem(userKey);
 }
 
-/** 格式化token（jwt格式） */
-export const formatToken = (token: string): string => {
-  return "Bearer " + token;
+const remembered = {
+  isRemembered: false,
+  loginDay: 7,
+  loginTime: 0,
+  userInfo: {}
+};
+// 获取记住的用户信息
+export const getRemembered = () => {
+  // 获取加密的用户信息
+  const user = storageLocal().getItem(RememberedKey);
+  // 如果不存在，则返回默认值
+  if (!user) return remembered;
+  // 解密用户信息
+  const userStr = decryptDes(user);
+  const userObj = JSON.parse(userStr);
+  // 如果是记住密码状态，需要判断是否过期
+  if (userObj.isRemembered) {
+    const now = new Date().getTime();
+    const loginDay = userObj.loginDay * 24 * 60 * 60 * 1000;
+    // 当前时间与期限的时间差大于登录时间的loginDay，则认为记录密码失效，清除用户信息，并重置状态
+    if (now - loginDay > userObj.loginTime) {
+      userObj.isRemembered = false;
+      userObj.loginTime = 0;
+      userObj.userInfo = {};
+      storageLocal().setItem(
+        RememberedKey,
+        encryptDes(JSON.stringify(userObj))
+      );
+    }
+  }
+  return userObj;
+};
+
+// 设置记住的用户信息 -- userInfo -- 用户信息
+export const setRemembered = userInfo => {
+  // 获取当前时间
+  const now = new Date().getTime();
+  // 配置记住的用户信息，默认7天
+  const userObj = {
+    isRemembered: true,
+    loginDay: 7,
+    loginTime: now,
+    userInfo
+  };
+  /**
+   * 将用户信息加密后存入localStorage
+   * RememberedKey ==> 存储key
+   * */
+  const userStr = JSON.stringify(userObj);
+  const user = encryptDes(userStr);
+  storageLocal().setItem(RememberedKey, user);
 };
 
 /** 是否有按钮级别的权限（根据登录接口返回的`permissions`字段进行判断）*/
 export const hasPerms = (value: string | Array<string>): boolean => {
   if (!value) return false;
-  const allPerms = "*:*:*";
-  const { permissions } = useUserStoreHook();
-  if (!permissions) return false;
-  if (permissions.length === 1 && permissions[0] === allPerms) return true;
-  const isAuths = isString(value)
-    ? permissions.includes(value)
-    : isIncludeAllChildren(value, permissions);
-  return isAuths ? true : false;
+  return true;
 };

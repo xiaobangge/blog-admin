@@ -1,18 +1,17 @@
 import { reactive, ref } from "vue";
 import type { FieldOption } from "@/components/CustomForm/types";
-import { articleManagementColumn } from "@/utils/columnData";
+import { commentManagementColumn } from "@/utils/columnData";
 import dateUtils from "@/utils/dateUtils";
 import {
-  getArticleList,
-  updateArticle,
-  addArticle,
-  deleteArticle,
-  getArticleTypeList,
-  getArticleOne
-} from "@/api/Article";
+  getMomentsList,
+  editMoments,
+  addMoments,
+  deleteMoments,
+  getMomentsDetail
+} from "@/api/Comment";
 import { message } from "@/utils/message";
 import timeUtils from "@/utils/dateUtils";
-import { isAuth, UserButtonEnum } from "@/utils/buttonOermission";
+import { isAuth } from "@/utils/buttonOermission";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
 import router from "@/router";
 
@@ -34,19 +33,10 @@ export const tableData = ref([]);
 export const searchFields: FieldOption[] = reactive([
   {
     type: "input",
-    label: "文章标题",
-    prop: "title",
-    placeholder: "文章标题",
+    label: "关键字",
+    prop: "content",
+    placeholder: "关键字",
     style: "width: 25%"
-  },
-  {
-    type: "select",
-    label: "文章类型",
-    labelWidth: 85,
-    prop: "type",
-    placeholder: "文章类型",
-    style: "width: 25%",
-    options: []
   },
   {
     type: "datetimerange",
@@ -61,8 +51,7 @@ export const searchFields: FieldOption[] = reactive([
 // 搜索展双向绑定data
 export const searchData = reactive({
   createTime: dateUtils.getTimeRangeForLastNDays(180),
-  title: "",
-  type: 0
+  content: ""
 });
 
 export type SortConfig = {
@@ -77,29 +66,6 @@ export const sortConfig = reactive<SortConfig>({
 // 添加用户表单展示配置
 export const addFormFields = reactive<FieldOption[]>([
   {
-    type: "input",
-    label: "标题",
-    prop: "title",
-    placeholder: "请输入标题",
-    style: "width: 100%"
-  },
-  {
-    type: "upload",
-    label: "封面",
-    prop: "image_url",
-    placeholder: "封面",
-    upload_type: "image",
-    style: "width: 100%"
-  },
-  {
-    type: "select",
-    label: "文章类型",
-    prop: "type",
-    placeholder: "文章类型",
-    style: "width: 100%",
-    options: []
-  },
-  {
     type: "editor",
     label: "内容",
     prop: "content",
@@ -110,35 +76,15 @@ export const addFormFields = reactive<FieldOption[]>([
 
 export const articleTypes = ref([]);
 
-const loadArticleTypes = async () => {
-  const response = await getArticleTypeList();
-  articleTypes.value = response.data.map(item => {
-    return { label: item.name, value: item.id };
-  });
-  addFormFields[2].options = articleTypes.value;
-  searchFields[1].options = [
-    { label: "全部", value: 0 },
-    ...articleTypes.value
-  ];
-};
-loadArticleTypes();
-
 // 添加用户表单双向绑定data
 export const addFormData = ref({
   id: 0,
-  title: "", // 登录账号
   content: "", // 用户名称
-  type: "", // 登录密码
-  state: true, // 用户状态（默认启用）
-  image_url: ""
 } as any);
 
 // 表单验证规则
 export const formRules = {
-  title: [{ required: true, message: "请输入标题", trigger: "blur" }],
-  content: [{ required: true, message: "请输入内容", trigger: "blur" }],
-  image_url: [{ required: true, message: "请上传封面", trigger: "blur" }],
-  type: [{ required: true, message: "请选择文章类型", trigger: "blur" }]
+  content: [{ required: true, message: "请输入内容", trigger: "blur" }]
 };
 // Table表格的系列操作
 
@@ -148,7 +94,7 @@ export const columns = [
     align: "left",
     selectable: row => !row.is_client
   },
-  ...articleManagementColumn,
+  ...commentManagementColumn,
 
   {
     label: "操作",
@@ -160,8 +106,8 @@ export const columns = [
           {
             <el-button
               type="primary"
-              disabled={isAuth()}
               size="small"
+              disabled={isAuth()}
               link
               // icon={<IconifyIconOffline icon={EditIcon} />}
               onClick={() => editRow(row)}
@@ -189,24 +135,22 @@ export const columns = [
 
 const editRow = (row: any) => {
   router.push({
-    path: "/document/article/create",
+    path: "/document/comment/create",
     query: { id: row.row.id }
   });
 };
 
 export const deleteData = async (row: any) => {
   // @ts-ignore
-  await deleteArticle(row.row.id);
+  await deleteMoments(row.row.id);
   loadData();
   message("删除成功", { type: "success" });
 };
 // 请求数据
 export const loadData = async () => {
   console.log(searchData, sortConfig);
-  const response = await getArticleList({
-    title: searchData.title,
-    type: searchData.type,
-    // state: searchData.state === -1 ? 0 : searchData.state,
+  const response = await getMomentsList({
+    content: searchData.content,
     currentPage: pagination.value.currentPage,
     pageSize: pagination.value.pageSize,
     start_time: timeUtils.convertToChinaTime(searchData.createTime[0]),
@@ -227,41 +171,33 @@ export const loadData = async () => {
 export const updataRowData = async (customFormRef?) => {
   const body = {
     ...addFormData.value,
-    state: addFormData.value.state ? 1 : 2,
     id: addFormData.value.id
   };
-  console.log(body, addFormData.value);
   // @ts-ignore
-  const res = await updateArticle(body);
+  const res = await editMoments(body);
   if (res.code === 200) {
     customFormRef.value?.resetFields();
-    router.push("/document/article/index");
+    router.push("/document/comment/index");
   }
 };
 
 // 添加单条数据
 export const addRowData = async (customFormRef?) => {
   const body = {
-    ...addFormData.value,
-    state: addFormData.value.state ? 1 : 2
+    ...addFormData.value
   };
-  console.log(body, addFormData.value);
   // @ts-ignore
-  const res = await addArticle(body);
+  const res = await addMoments(body);
   if (res.code === 200) {
     customFormRef.value?.resetFields();
-    router.push("/document/article/index");
+    router.push("/document/comment/index");
   }
 };
 
 // 获取文章详情
 export const getArticleDetail = async (id: number) => {
-  const response = await getArticleOne(id);
-  for (const key in addFormData.value) {
-    if (key === "type") {
-      addFormData.value[key] = Number(response.data[key]);
-    } else {
-      addFormData.value[key] = response.data[key];
-    }
-  }
+  const response = await getMomentsDetail(id);
+  console.log(response.data);
+  addFormData.value["content"] = response.data["content"];
+  addFormData.value["id"] = response.data["id"];
 };

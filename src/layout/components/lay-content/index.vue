@@ -137,6 +137,11 @@ const transitionMain = defineComponent({
                 <BackTopIcon />
               </el-backtop>
               <div class="grow">
+                <el-alert
+                  center
+                  title="亲爱的朋友们好，博主对项目做了点限制，非博主无法进行数据的增删改操作哦，还请见谅！"
+                  type="error"
+                />
                 <transitionMain :route="route">
                   <keep-alive
                     v-if="isKeepAlive"

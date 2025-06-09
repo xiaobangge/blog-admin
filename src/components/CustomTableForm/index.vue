@@ -1,7 +1,7 @@
 <template>
   <div>
     <transition name="accordion">
-      <div v-show="searchShow" class="search-area">
+      <div v-show="searchShow && props.fields?.length" class="search-area">
         <CustomForm
           :labelWidth="props.labelWidth"
           type="search"

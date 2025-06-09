@@ -1,7 +1,9 @@
 import { useRoute } from "vue-router";
+import { useUserStoreHook } from "@/store/modules/user";
 // 判断是否有权限
-export const isAuth = (_auth: string) => {
-  return true;
+export const isAuth = (_username?: string) => {
+  const { userInfo } = useUserStoreHook();
+  return userInfo?.username !== (_username || "Sean");
   // const route = useRoute();
   // return !auth || route.meta.auths?.includes(auth);
 };

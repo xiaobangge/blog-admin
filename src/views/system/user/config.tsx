@@ -13,7 +13,7 @@ import {
 } from "@/api/user";
 import { message } from "@/utils/message";
 import timeUtils from "@/utils/dateUtils";
-import { isAuth, UserButtonEnum } from "@/utils/buttonOermission";
+import { isAuth } from "@/utils/buttonOermission";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
 
 export const pagination = ref({
@@ -240,56 +240,59 @@ export const columns = [
       if (!row.row.is_client) {
         return (
           <div>
-            {isAuth(UserButtonEnum.编辑) && (
+            {
               <el-button
                 type="primary"
                 size="small"
+                disabled={isAuth()}
                 link
                 // icon={<IconifyIconOffline icon={EditIcon} />}
                 onClick={() => editRow(row)}
               >
                 编辑
               </el-button>
-            )}
-            {isAuth(UserButtonEnum.密码) && (
+            }
+            {
               <el-button
                 type="success"
                 size="small"
+                disabled={isAuth(row.row.username)}
                 link
                 // icon={<IconifyIconOffline icon={EditIcon} />}
                 onClick={() => resetPasswordFun(row)}
               >
                 重置密码
               </el-button>
-            )}
-            {isAuth(UserButtonEnum.删除) && (
+            }
+            {
               <CustomButton
                 type="danger"
                 hasBorder={false}
+                disabled={isAuth()}
                 text={"删除"}
-                disabled={false}
                 customEvent={() => deleteData(row)}
               >
                 {/* <IconifyIconOffline icon={DeleteIcon} /> */}
                 <span style="margin-left: 2px">删除</span>
               </CustomButton>
-            )}
+            }
           </div>
         );
       } else {
         return (
           <div>
-            {isAuth(UserButtonEnum.查看) && (
+            {
               <el-button
                 type="primary"
                 size="small"
+                disabled={isAuth()}
                 link
                 // icon={<IconifyIconOffline icon={EditIcon} />}
                 onClick={() => viewRow(row)}
               >
                 查看
               </el-button>
-            )}
+            }
           </div>
         );
       }

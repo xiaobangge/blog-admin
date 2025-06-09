@@ -1,6 +1,6 @@
 <template>
   <div
-    class="w-[100vw] h-[100vh] flex justify-center items-center bg-[#dbefff]"
+    class="w-[100vw] h-[100vh] flex justify-center items-center bg-[url('@/assets/image/aboutTime.jpg')] bg-size-[100%_100%]"
   >
     <div
       class="w-[850px] h-[500px] rounded-3xl bg-white flex relative shadow-[0_0_30px_0_rgba(0,0,0,0.2)] overflow-hidden"

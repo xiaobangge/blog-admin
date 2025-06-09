@@ -9,26 +9,26 @@ import {
 } from "../utils";
 import type { UserResult } from "@/api/user";
 import { useMultiTagsStoreHook } from "./multiTags";
-import { type DataInfo, removeToken, userKey, TokenKey } from "@/utils/auth";
+import {
+  type DataInfo,
+  removeToken,
+  userKey,
+  TokenKey,
+  setRemembered,
+  getRemembered
+} from "@/utils/auth";
 import { login } from "@/api/Login";
 import { message } from "@/utils/message";
 
 export const useUserStore = defineStore("pure-user", {
   state: (): userType => ({
     userInfo: storageLocal().getItem<DataInfo<userType>>(userKey) || {},
-    // 是否勾选了登录页的免登录
-    isRemembered: false,
-    // 登录页的免登录存储几天，默认7天
-    loginDay: 7
+    remembered: getRemembered()
   }),
   actions: {
     /** 存储是否勾选了登录页的免登录 */
     SET_ISREMEMBERED(bool: boolean) {
-      this.isRemembered = bool;
-    },
-    /** 设置登录页的免登录存储几天 */
-    SET_LOGINDAY(value: number) {
-      this.loginDay = Number(value);
+      this.remembered.isRemembered = bool;
     },
     SET_USERINFO(data: DataInfo<userType>) {
       this.userInfo = data;
@@ -42,6 +42,11 @@ export const useUserStore = defineStore("pure-user", {
               const { token, user } = res.data;
               storageLocal().setItem(userKey, { ...user });
               storageLocal().setItem(TokenKey, token);
+              if (this.remembered.isRemembered) {
+                setRemembered({
+                  ...data
+                });
+              }
               this.SET_USERINFO({ ...user });
               resolve(res);
             } else {

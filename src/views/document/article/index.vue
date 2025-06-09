@@ -11,17 +11,12 @@
     @loadData="loadData"
     @pageChange="pageChange"
   >
-    <el-button
-      v-if="isAuth(UserButtonEnum.添加)"
-      v-debounce="handleAdd"
-      type="primary"
-    >
+    <el-button :disabled="isAuth()" v-debounce="handleAdd" type="primary">
       新增
     </el-button>
     <CustomButton
-      v-if="isAuth(UserButtonEnum.删除)"
+      :disabled="isAuth() && isDisabled"
       type="success"
-      :disabled="isDisabled"
       :customEvent="handleDelete"
       >删除</CustomButton
     >
@@ -43,9 +38,9 @@ import {
 } from "./config";
 import CustomTableForm from "@/components/CustomTableForm/index.vue";
 import { message } from "@/utils/message";
-import { deleteUser } from "@/api/user";
+import { deleteArticle } from "@/api/Article";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
-import { isAuth, UserButtonEnum } from "@/utils/buttonOermission";
+import { isAuth } from "@/utils/buttonOermission";
 import router from "@/router";
 import BkSvg from "@/components/BkSvg/index.vue";
 
@@ -74,7 +69,7 @@ const handleDelete = async () => {
       ids.push(item.id);
     }
     console.log(ids);
-    const res = await deleteUser(ids);
+    const res = await deleteArticle(ids);
     if (res.code === 200) {
       message("删除成功", { type: "success" });
       loadData();

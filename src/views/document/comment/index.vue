@@ -11,7 +11,7 @@
     @loadData="loadData"
     @pageChange="pageChange"
   >
-    <el-button v-debounce="handleAdd" :disabled="isAuth()" type="primary">
+    <el-button :disabled="isAuth()" v-debounce="handleAdd" type="primary">
       新增
     </el-button>
     <CustomButton
@@ -29,26 +29,19 @@ import {
   loadData,
   searchData,
   searchFields,
-  formRules,
-  addFormFields,
-  addFormData,
   pagination,
   tableData,
-  addRowData,
   pageChange,
-  changeFormData,
-  updataRowData,
   sortConfig,
   columns as initialColumns
 } from "./config";
 import CustomTableForm from "@/components/CustomTableForm/index.vue";
 import { message } from "@/utils/message";
-import { addDialog } from "@/components/ReDialog";
-import CustomForm from "@/components/CustomForm/CustomForm.vue";
-import { deleteUser } from "@/api/user";
-import CustomSwitch from "@/components/CustomForm/CustomSwitch.vue";
+import { deleteMoments } from "@/api/Comment";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
-import { isAuth, UserButtonEnum } from "@/utils/buttonOermission";
+import { isAuth } from "@/utils/buttonOermission";
+import router from "@/router";
+import BkSvg from "@/components/BkSvg/index.vue";
 
 // 定义响应式状态
 const selectedData = ref([]);
@@ -63,35 +56,8 @@ const selectedDataEvent = (data: any[]) => {
   isDisabled.value = data.length === 0;
 };
 
-// 处理新增按钮点击事件
-const customFormRef = ref(null);
-const handleFormReady = formRef => {
-  customFormRef.value = formRef;
-};
 const handleAdd = () => {
-  addDialog({
-    title: "添加用户",
-    contentRenderer() {
-      return (
-        <CustomForm
-          type="form"
-          fields={addFormFields}
-          modelValue={addFormData}
-          rules={formRules}
-          onFormReady={handleFormReady}
-        />
-      );
-    },
-    beforeSure(done) {
-      customFormRef.value.validate(valid => {
-        console.log(valid);
-        if (valid) {
-          addRowData(done, customFormRef);
-        }
-      });
-    },
-    closeCallBack() {}
-  });
+  router.push("/document/comment/create");
 };
 
 // 处理删除按钮点击事件
@@ -102,7 +68,7 @@ const handleDelete = async () => {
       ids.push(item.id);
     }
     console.log(ids);
-    const res = await deleteUser(ids);
+    const res = await deleteMoments(ids);
     if (res.code === 200) {
       message("删除成功", { type: "success" });
       loadData();
@@ -117,48 +83,18 @@ const columns = initialColumns.map(item => {
   if (item.label === "登录名称" || item.label === "创建时间") {
     item.sortable = true;
   }
-  if (item.label === "头像") {
+  if (item.label === "点赞数") {
     item.cellRenderer = (row: any) => {
       return (
-        <div>
-          {row.row.avatar ? (
-            <img
-              src={row.row.avatar}
-              alt="头像"
-              class="w-[32px] h-[32px] rounded-full"
-            />
-          ) : (
-            <span v-else>-</span>
-          )}
-        </div>
-      );
-    };
-  }
-  if (item.label === "状态") {
-    item.cellRenderer = (row: any) => {
-      const state = ref(row.row.state === 1);
-      return (
-        <div>
-          {
-            <CustomSwitch
-              v-model={state.value}
-              disabled={isAuth()}
-              updataRowData={() => changeStatus(row)}
-              title={item.label}
-            />
-          }
+        <div class="flex items-center justify-center">
+          <BkSvg iconName="icon-dianzan" class="mr-1" />
+          {row.row.like_count ?? 0}
         </div>
       );
     };
   }
   return item;
 });
-
-const changeStatus = row => {
-  const state = row.row.state !== 1;
-  changeFormData.value = { ...row.row, state };
-  updataRowData(changeFormData);
-};
 
 // 初始化数据
 onMounted(() => {

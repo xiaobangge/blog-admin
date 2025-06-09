@@ -36,19 +36,18 @@ import {
   tableData,
   addRowData,
   pageChange,
-  changeFormData,
-  updataRowData,
   sortConfig,
+  typeList,
   columns as initialColumns
 } from "./config";
 import CustomTableForm from "@/components/CustomTableForm/index.vue";
 import { message } from "@/utils/message";
 import { addDialog } from "@/components/ReDialog";
 import CustomForm from "@/components/CustomForm/CustomForm.vue";
-import { deleteUser } from "@/api/user";
-import CustomSwitch from "@/components/CustomForm/CustomSwitch.vue";
+import { deleteLink } from "@/api/Links";
 import CustomButton from "@/components/CustomForm/CustomButton.vue";
-import { isAuth, UserButtonEnum } from "@/utils/buttonOermission";
+import { isAuth } from "@/utils/buttonOermission";
+import {ElTooltip} from "element-plus";
 
 // 定义响应式状态
 const selectedData = ref([]);
@@ -72,6 +71,11 @@ const handleAdd = () => {
   addDialog({
     title: "添加用户",
     contentRenderer() {
+      addFormData.value.avatar = "";
+      addFormData.value.name = "";
+      addFormData.value.url = "";
+      addFormData.value.type = 1;
+      addFormData.value.remark = "";
       return (
         <CustomForm
           type="form"
@@ -102,7 +106,7 @@ const handleDelete = async () => {
       ids.push(item.id);
     }
     console.log(ids);
-    const res = await deleteUser(ids);
+    const res = await deleteLink(ids);
     if (res.code === 200) {
       message("删除成功", { type: "success" });
       loadData();
@@ -114,17 +118,17 @@ const handleDelete = async () => {
 
 // 修改 columns 配置
 const columns = initialColumns.map(item => {
-  if (item.label === "登录名称" || item.label === "创建时间") {
+  if (item.label === "名称" || item.label === "创建时间") {
     item.sortable = true;
   }
-  if (item.label === "头像") {
+  if (item.label === "logo") {
     item.cellRenderer = (row: any) => {
       return (
         <div>
           {row.row.avatar ? (
             <img
               src={row.row.avatar}
-              alt="头像"
+              alt="LOGO"
               class="w-[32px] h-[32px] rounded-full"
             />
           ) : (
@@ -134,31 +138,37 @@ const columns = initialColumns.map(item => {
       );
     };
   }
-  if (item.label === "状态") {
+  if (item.label === "类型") {
     item.cellRenderer = (row: any) => {
-      const state = ref(row.row.state === 1);
+      console.log(row.row.type, typeList);  
       return (
         <div>
-          {
-            <CustomSwitch
-              v-model={state.value}
-              disabled={isAuth()}
-              updataRowData={() => changeStatus(row)}
-              title={item.label}
-            />
-          }
+          {typeList.find(type => type.value === Number(row.row.type))?.label || "-"}
         </div>
+      );
+    };
+  }
+  if (item.label === "描述") {
+    item.cellRenderer = (row: any) => {
+      const html = `<div class="w-[200px]">${row.row.remark || "-"}</div>`
+      return (
+        <ElTooltip placement="bottom" content={html} raw-content>
+          <div
+            class="w-[200px] overflow-hidden text-ellipsis"
+            style="
+              display: -webkit-box; /* 将容器以弹性盒子形式布局 */
+              -webkit-line-clamp: 2; /* 限制文本显示为两行 */
+              -webkit-box-orient: vertical; /* 将弹性盒子的主轴方向设置为垂直方向 */
+            "
+          >
+            {row.row.remark || "-"}
+          </div>
+        </ElTooltip>
       );
     };
   }
   return item;
 });
-
-const changeStatus = row => {
-  const state = row.row.state !== 1;
-  changeFormData.value = { ...row.row, state };
-  updataRowData(changeFormData);
-};
 
 // 初始化数据
 onMounted(() => {
